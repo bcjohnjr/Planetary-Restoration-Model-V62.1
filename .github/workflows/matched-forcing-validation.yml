@@ -1,0 +1,155 @@
+name: V62 Matched Forcing — FaIR + Hector
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  FAIR_SOURCE_DIR: /tmp/FAIR-v2.2.4
+
+jobs:
+  fair-matched:
+    name: FaIR 2.2.4 matched non-CO2 forcing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install FaIR workload
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install fair==2.2.4 numpy pandas xarray scipy
+      - name: Clone official FaIR 2.2.4 calibration source
+        run: |
+          rm -rf "$FAIR_SOURCE_DIR"
+          git clone --depth 1 --branch v2.2.4 https://github.com/OMS-NetZero/FAIR.git "$FAIR_SOURCE_DIR"
+      - name: Verify inputs
+        run: |
+          test -f external_validation_net_co2_trajectory.csv
+          test -f run_fair_matched_forcing_v62.py
+          test -f "$FAIR_SOURCE_DIR/examples/data/calibrated_constrained_ensemble/calibrated_constrained_parameters_calibration1.4.1.csv"
+          python -m py_compile run_fair_matched_forcing_v62.py
+      - name: Run FaIR matched-forcing experiment
+        run: |
+          set -o pipefail
+          python run_fair_matched_forcing_v62.py 2>&1 | tee FAIR_MATCHED_FORCING_CONSOLE.log
+      - name: Verify FaIR outputs
+        run: |
+          python - <<'PY'
+          import json, pandas as pd
+          s=json.load(open('fair_matched_summary.json'))
+          a=pd.read_csv('fair_matched_attribution.csv')
+          t=pd.read_csv('fair_matched_nonco2_forcing.csv')
+          assert s['configs']==841
+          assert s['forcing_match_max_abs_on_wm2'] <= s['forcing_match_tolerance_wm2']
+          assert s['forcing_match_max_abs_off_wm2'] <= s['forcing_match_tolerance_wm2']
+          assert len(a) > 500 and len(t) >= 275
+          print('FaIR matched-forcing outputs verified.')
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: v62-fair-matched-forcing
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            fair_matched_nonco2_forcing.csv
+            fair_matched_attribution.csv
+            fair_matched_timeseries.csv
+            fair_matched_summary.json
+            FAIR_MATCHED_FORCING_CONSOLE.log
+
+  hector-matched:
+    name: Hector 3.5.0 matched non-CO2 forcing
+    needs: fair-matched
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: v62-fair-matched-forcing
+          path: fair-artifact
+      - name: Stage common forcing target
+        run: |
+          cp fair-artifact/fair_matched_nonco2_forcing.csv .
+          test -f fair_matched_nonco2_forcing.csv
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.5.1"
+          use-public-rspm: true
+      - name: System libraries for Hector
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libboost-dev libboost-filesystem-dev libboost-system-dev
+      - name: Install Hector 3.5.0
+        run: |
+          Rscript -e 'install.packages(c("Rcpp", "BH", "jsonlite"), repos="https://cloud.r-project.org")'
+          rm -rf /tmp/hector-v3.5.0
+          git clone --depth 1 --branch v3.5.0 https://github.com/JGCRI/hector.git /tmp/hector-v3.5.0
+          R CMD INSTALL --no-multiarch --with-keep.source /tmp/hector-v3.5.0
+          Rscript -e 'library(hector); stopifnot(as.character(packageVersion("hector")) == "3.5.0")'
+      - name: Verify Hector inputs
+        run: |
+          test -f external_validation_net_co2_trajectory.csv
+          test -f run_hector_matched_forcing_v62.R
+          test -f fair_matched_nonco2_forcing.csv
+      - name: Run Hector matched-forcing experiment
+        run: |
+          set -o pipefail
+          Rscript run_hector_matched_forcing_v62.R 2>&1 | tee HECTOR_MATCHED_FORCING_CONSOLE.log
+      - name: Verify Hector outputs
+        run: |
+          Rscript -e 's <- jsonlite::read_json("hector_matched_summary.json", simplifyVector=TRUE); stopifnot(s$forcing_match_max_abs_on_wm2 <= s$forcing_match_tolerance_wm2); stopifnot(s$forcing_match_max_abs_off_wm2 <= s$forcing_match_tolerance_wm2); cat("Hector matched-forcing outputs verified.\n")'
+      - uses: actions/upload-artifact@v7
+        with:
+          name: v62-hector-matched-forcing
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            hector_matched_attribution.csv
+            hector_matched_timeseries.csv
+            hector_matched_summary.json
+            HECTOR_MATCHED_FORCING_CONSOLE.log
+
+  compare:
+    name: Compare matched FaIR + Hector
+    needs: [fair-matched, hector-matched]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: v62-fair-matched-forcing
+          path: fair-artifact
+      - uses: actions/download-artifact@v8
+        with:
+          name: v62-hector-matched-forcing
+          path: hector-artifact
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Stage comparison inputs
+        run: |
+          cp fair-artifact/fair_matched_attribution.csv .
+          cp fair-artifact/fair_matched_summary.json .
+          cp hector-artifact/hector_matched_attribution.csv .
+          cp hector-artifact/hector_matched_summary.json .
+      - name: Compare models
+        run: |
+          python -m pip install numpy pandas
+          python compare_matched_forcing_v62.py | tee MATCHED_FORCING_COMPARISON_CONSOLE.log
+      - uses: actions/upload-artifact@v7
+        with:
+          name: V62-Matched-Forcing-Cross-Model-Comparison
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            matched_forcing_cross_model_summary.csv
+            matched_forcing_cross_model_summary.json
+            MATCHED_FORCING_RESULTS.md
+            MATCHED_FORCING_COMPARISON_CONSOLE.log
