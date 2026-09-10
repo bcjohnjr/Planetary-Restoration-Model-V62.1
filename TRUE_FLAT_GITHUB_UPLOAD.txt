@@ -1,0 +1,12 @@
+Planetary Restoration Model V62.0 — TRUE FLAT GitHub upload
+
+Every file required to execute V62.0 is in this single directory. No legacy_v60/, data/, figures/, manuscript/, or results/ input directory is required for execution.
+
+Upload ALL files in this directory to the GitHub repository root. Existing .github/workflows/v62-model.yml may remain in place.
+
+Run:
+  bash RUN_TESTS.sh
+or:
+  python planetary_restoration_model_v62.py --tests
+
+Fresh generated outputs are written to results/ by the model at runtime.

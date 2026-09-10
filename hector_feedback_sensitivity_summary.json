@@ -1,0 +1,53 @@
+{
+  "model": "Hector",
+  "version": "3.5.0",
+  "experiment": "programme-contingent feedback sensitivity after strict paired attribution",
+  "common_state_year": 2025,
+  "common_state_co2_ppm": 418.442532462758,
+  "common_state_tas_degc": 1.52679482094149,
+  "common_state_max_co2_error_ppm": 0,
+  "common_state_max_tas_error_degc": 0,
+  "reporting_gtco2_per_ppm": 7.78245907917742,
+  "permafrost_method": {
+    "source": "project V52 causal running-peak commitment formulation",
+    "carbon_feedback_pgc_per_c": 18,
+    "activation_warming_c": 1.2,
+    "thaw_release_tau_yr": 50,
+    "fixed_point_damping": 0.5,
+    "convergence_tolerance_gtco2_yr": 1e-05,
+    "historical_commitment_treatment": "excluded because implicit in the exact common 2025 state"
+  },
+  "cumulative_exported_reversal_2026_2300_gtco2": 184.711467159601,
+  "cumulative_exported_permafrost_2026_2300_gtco2": 26.0085755787309,
+  "cumulative_dynamic_permafrost_on_2026_2300_gtco2": 18.5745401255996,
+  "cumulative_dynamic_permafrost_off_same_reversal_2026_2300_gtco2": 27.028624528879,
+  "cumulative_dynamic_permafrost_off_no_reversal_2026_2300_gtco2": 25.6837794427501,
+  "response_fraction_2300": {
+    "legacy_strict_pair": 0.243703273975215,
+    "reversal_zero_off_only": 0.221546160495621,
+    "dynamic_permafrost_only": 0.244332698395763,
+    "combined_programme_effect": 0.222043702206331
+  },
+  "delta_co2_2300_ppm": {
+    "legacy_strict_pair": 82.391566395478,
+    "reversal_zero_off_only": 74.9006564187341,
+    "dynamic_permafrost_only": 82.6043631424835,
+    "combined_programme_effect": 75.0688660624692
+  },
+  "reversal_window_combined": {
+    "cumulative_cdr_added_2156_to_2200_gtco2": 255.902270289413,
+    "attributable_burden_2156_gtco2": 616.258617668013,
+    "attributable_burden_2200_gtco2": 555.278640052962,
+    "attributable_burden_change_2156_to_2200_gtco2": -60.9799776150505,
+    "co2_on_2156_ppm": 310.158513786933,
+    "co2_on_2200_ppm": 316.400869326267,
+    "co2_off_2156_ppm": 389.344104279386,
+    "co2_off_2200_ppm": 387.75089306602
+  },
+  "fixed_point_closure_error_gtco2_yr": {
+    "dynamic_on": 3.11136512665122e-08,
+    "dynamic_off_same_reversal": 1.29440332952147e-07,
+    "dynamic_off_no_reversal": 1.31765956840058e-07
+  },
+  "interpretation_boundary": "legacy_strict_pair is a direct CDR counterfactual conditional on exported feedbacks; combined_programme_effect is a programme-effect sensitivity in which storage reversal is contingent on prior CDR and permafrost responds to each arm's own Hector temperature."
+}

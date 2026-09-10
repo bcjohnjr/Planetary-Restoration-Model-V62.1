@@ -1,0 +1,21 @@
+Planetary Restoration Model V62.0 — submission status
+
+MODEL/BUILD: PASS
+- V62 executable tests pass.
+- 85 named modules in registry.
+- 48 mandatory completeness identifiers present.
+- Run10 climate core locked to all-green GitHub Actions run 34289949707.
+
+MANUSCRIPT RENDER QA: PASS
+- 17/17 pages visually inspected after final formatting fixes.
+- No clipping, overlap, missing glyphs, or broken tables observed.
+
+SCIENTIFIC GATES STILL OPEN (disclosed in manuscript):
+- OSCAR execution or explicit justified revision of that predeclared gate.
+- Matched FaIR/Hector future non-CO2 forcing protocol if exact cross-model equivalence is claimed.
+- Temperature-coupled carbonate chemistry for publication-grade ocean-pH timing.
+- Regional marine heatwave / Degree Heating Week coupling before claiming a Great Barrier Reef restoration year.
+- Technology-specific CDR cost/deployment/capital/incidence modelling before claiming complete fundability.
+- External validation of robot-doctor/robot-lawyer service-capacity assumptions before claiming realized gains.
+
+Accordingly, V62.0 is a complete integrated working release with an all-green Run10 climate core, but these open gates should not be described as already closed.

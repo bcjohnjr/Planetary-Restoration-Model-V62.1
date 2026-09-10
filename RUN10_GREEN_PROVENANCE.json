@@ -1,0 +1,16 @@
+{
+  "workflow_run_id": 34289949707,
+  "workflow_status": "completed",
+  "workflow_conclusion": "success",
+  "head_branch": "main",
+  "head_sha": "3dbdcab603cf31ec16bbb2eaee4ab54b82472b17",
+  "workflow": ".github/workflows/science-gates-run10.yml",
+  "artifacts": {
+    "fair-feedback-sensitivity": {"artifact_id": 10081564865, "sha256": "9a44f4f05fd0efb59f42bf41ce3a819b625dacbc348811287a10520ea7c12f98"},
+    "fair-policy-inverse-2400": {"artifact_id": 10081356893, "sha256": "5a6ca25894d5c06bdbf358d4eaf9d6f641c0bd86fdafdfe73262207004511961"},
+    "fair-policy-inverse-2300": {"artifact_id": 10081321210, "sha256": "a2c534de256bf2508daff655f93f68916ecac7eb56a5b1404e60fdd2b4ab4b48"},
+    "fair-policy-inverse-2200": {"artifact_id": 10081223924, "sha256": "8edba02b310e8ab5eea5a2d9fd04f519ddf2985fc883a3d9640d28511423212f"},
+    "hector-feedback-sensitivity": {"artifact_id": 10081058418, "sha256": "da80f9ee1565de8ef7a1eee4eb3d17d4c7b9e4e0e9758f385542f0047b429189"}
+  },
+  "note": "The structured Run10 science files included in this V62 package are the verified outputs used to construct the close-out summary. The green-run provenance above supersedes the earlier red-Hector CI status in the older local result archive."
+}

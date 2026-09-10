@@ -1,0 +1,94 @@
+{
+  "model": "FaIR 2.2.4",
+  "calibration": "fair-calibrate 1.4.1",
+  "configs": 841,
+  "gtco2_per_ppm": 7.782459079177421,
+  "canonical_cdr_2026_2183_gtco2": 2013.8807318595145,
+  "canonical_reversal_2026_2183_gtco2": 83.40383634628043,
+  "canonical_reversal_fraction_of_cdr": 0.041414486482161034,
+  "common_state_co2_maxabs_ppm_at_2026": 0.0,
+  "common_state_tas_definition": "member-specific FaIR timebound 2026 before programme emissions take effect",
+  "permafrost_formulation": {
+    "carbon_pgc_per_degree_c": 18.0,
+    "activation_degc": 1.2,
+    "tau_years": 50.0,
+    "running_peak_commitment": true,
+    "historical_commitment_reinjected": false,
+    "fixed_point_damping": 0.45,
+    "tolerance_gtco2_per_year": 0.0001
+  },
+  "fixed_point_closure_error_gtco2_yr": {
+    "dynamic_on": 2.8856146212508094e-06,
+    "dynamic_off_same_reversal": 4.820939757455012e-06,
+    "dynamic_off_no_reversal": 4.666629759730867e-06
+  },
+  "legacy_2300": {
+    "experiment": "legacy_strict_pair",
+    "timebound_year": 2300.0,
+    "cumulative_cdr_gtco2": 2625.8299502149275,
+    "delta_co2_p05_ppm": 85.88483135449951,
+    "delta_co2_p50_ppm": 104.03176804841752,
+    "delta_co2_p95_ppm": 124.4916175281997,
+    "fraction_p05": 0.25454625707340167,
+    "fraction_p50": 0.3083303157940665,
+    "fraction_p95": 0.36896940680965234
+  },
+  "combined_selected": {
+    "2156": {
+      "experiment": "combined_programme_effect",
+      "timebound_year": 2156.0,
+      "cumulative_cdr_gtco2": 1835.435551448252,
+      "delta_co2_p05_ppm": 77.01295079027125,
+      "delta_co2_p50_ppm": 93.24399058453685,
+      "delta_co2_p95_ppm": 105.26558508716187,
+      "fraction_p05": 0.3265438209579588,
+      "fraction_p50": 0.3953653074501985,
+      "fraction_p95": 0.4463382589163079
+    },
+    "2184": {
+      "experiment": "combined_programme_effect",
+      "timebound_year": 2184.0,
+      "cumulative_cdr_gtco2": 2013.8807318595173,
+      "delta_co2_p05_ppm": 74.51514805007145,
+      "delta_co2_p50_ppm": 91.66511274660388,
+      "delta_co2_p95_ppm": 105.13630551027978,
+      "fraction_p05": 0.28795701816118335,
+      "fraction_p50": 0.3542314982476295,
+      "fraction_p95": 0.40628969850371693
+    },
+    "2200": {
+      "experiment": "combined_programme_effect",
+      "timebound_year": 2200.0,
+      "cumulative_cdr_gtco2": 2098.2875205981945,
+      "delta_co2_p05_ppm": 74.14613392134436,
+      "delta_co2_p50_ppm": 91.69343874426022,
+      "delta_co2_p95_ppm": 106.16126889858617,
+      "fraction_p05": 0.2750048539380175,
+      "fraction_p50": 0.3400870604486217,
+      "fraction_p95": 0.3937476265222508
+    },
+    "2300": {
+      "experiment": "combined_programme_effect",
+      "timebound_year": 2300.0,
+      "cumulative_cdr_gtco2": 2625.8299502149275,
+      "delta_co2_p05_ppm": 80.16360173438801,
+      "delta_co2_p50_ppm": 95.83573033463193,
+      "delta_co2_p95_ppm": 116.4031197746109,
+      "fraction_p05": 0.23758962383923085,
+      "fraction_p50": 0.28403882345515463,
+      "fraction_p95": 0.3449966423988531
+    },
+    "2400": {
+      "experiment": "combined_programme_effect",
+      "timebound_year": 2400.0,
+      "cumulative_cdr_gtco2": 3153.3723798316605,
+      "delta_co2_p05_ppm": 91.45302656988537,
+      "delta_co2_p50_ppm": 103.23916874276051,
+      "delta_co2_p95_ppm": 125.7854942681384,
+      "fraction_p05": 0.2257042147952895,
+      "fraction_p50": 0.2547921746405726,
+      "fraction_p95": 0.31043604877015885
+    }
+  },
+  "interpretation": "combined_programme_effect is the corrected paired attribution: stored-carbon reversal is programme-contingent and therefore zero in removal-off; permafrost is generated from each arm/configuration own TAS path."
+}

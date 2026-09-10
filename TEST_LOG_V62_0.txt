@@ -1,0 +1,13 @@
+V62 TESTS PASSED — 85 modules, 48 mandatory completeness checks
+{
+  "run10_all_green": true,
+  "run10_workflow_run": 34289949707,
+  "faIR_configs": 841,
+  "canonical_cdr_2026_2183_gtco2": 2013.8807318595145,
+  "canonical_stored_reversal_2026_2183_gtco2": 83.40383634628043,
+  "faIR_combined_response_fraction_2300": 0.284039,
+  "Hector_combined_response_fraction_2300": 0.222043702206331,
+  "single_planetary_restoration_year": null,
+  "reason_no_single_year": "Atmospheric, cryosphere, reef, fishery, pollution, infrastructure and human-service systems have different state variables, lags, thresholds and governance dependencies."
+}
+PASS {'required_count': 48, 'registry_count': 85, 'missing': [], 'pass': True}
