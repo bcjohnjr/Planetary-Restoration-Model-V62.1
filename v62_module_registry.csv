@@ -1,0 +1,86 @@
+module_id,domain,module,classification
+climate_gross_emissions,Climate,Gross anthropogenic CO2 emissions pathway,LEGACY_MECHANISTIC
+climate_cdr_schedule,Climate,Canonical CDR schedule and post-2183 controls,EXTERNALLY_EXECUTED
+fair_paired_attribution,Climate,FaIR paired removal-on/off attribution,EXTERNALLY_EXECUTED
+hector_paired_attribution,Climate,Hector paired programme-feedback comparator,EXTERNALLY_EXECUTED
+inverse_fair_targets,Climate,Inverse FaIR 2200/2300/2400 target solves,EXTERNALLY_EXECUTED
+stored_carbon_reversal,Climate,Programme-contingent stored-carbon reversal,EXTERNALLY_EXECUTED
+dynamic_permafrost,Climate,Temperature-responsive permafrost feedback,EXTERNALLY_EXECUTED
+nonco2_forcing,Climate,Non-CO2 forcing sensitivity/background,DIAGNOSTIC_ONLY
+temperature_response,Climate,Temperature response / target-year diagnostics,EXTERNALLY_EXECUTED
+sea_level,Cryosphere/Ocean,Sea-level persistence screen,LITERATURE_SCREEN
+ice_melt,Cryosphere/Ocean,Glacier/ice-sheet lag represented through sea-level context,LITERATURE_SCREEN
+ocean_ph,Ocean,Surface-ocean pH / acidification screen,DIAGNOSTIC_ONLY
+coral_reefs,Ocean/Biodiversity,"Coral survival, cover and ecological recovery clocks",LITERATURE_SCREEN
+fisheries,Ocean/Food,Wild fish-stock rebuilding screen,LITERATURE_SCREEN
+seaweed_live_carbon,Ocean/CDR,Standing live seaweed farm carbon stock,ENGINEERING_SCENARIO
+seaweed_fuel_reserve_carbon,Ocean/Energy,Strategic seaweed-derived fuel reserve carbon stock,ENGINEERING_SCENARIO
+seaweed_food,Ocean/Food,Edible seaweed and protein/mineral stream,ENGINEERING_SCENARIO
+seaweed_fish_habitat,Ocean/Biodiversity,Managed fish habitat/co-culture services,ENGINEERING_SCENARIO
+seaweed_grid_harvesting,Ocean/Engineering,Grid Harvesting energy-reduction concept,ENGINEERING_SCENARIO
+seaweed_aviation_fuel,Energy/Aviation,Seaweed liquid fuels for aviation,ENGINEERING_SCENARIO
+seaweed_heavy_equipment_fuel,Energy/Industry,Seaweed liquid fuels for heavy equipment,ENGINEERING_SCENARIO
+seaweed_marine_fuel,Energy/Shipping,Seaweed liquid fuels for marine use,ENGINEERING_SCENARIO
+seaweed_CSP_HTL,Energy/Industry,Concentrated-solar + HTL integration,ENGINEERING_SCENARIO
+ocean_plastic_cleanup,Ocean/Pollution,Ocean plastic interception/removal/reuse,POLICY_SCENARIO
+eutrophication,Water/Ocean,Nutrient capture and eutrophication relief,LEGACY_MECHANISTIC
+blue_carbon,Ocean/Biodiversity,Mangrove/marsh/seagrass restoration,LITERATURE_SCREEN
+DACCS,CDR,Direct air capture with storage,ENGINEERING_SCENARIO
+enhanced_weathering,CDR/Land,Enhanced rock weathering,ENGINEERING_SCENARIO
+OAE_AWL,CDR/Ocean,Ocean alkalinity enhancement / accelerated weathering of limestone,ENGINEERING_SCENARIO
+mineral_carbonation,CDR/Materials,Mineral carbonation,ENGINEERING_SCENARIO
+biochar,CDR/Land,Biochar carbon storage,ENGINEERING_SCENARIO
+BiCRS,CDR,Biomass carbon removal and storage,ENGINEERING_SCENARIO
+saline_aquifer_storage,CDR/Geology,Deep saline aquifer storage,ENGINEERING_SCENARIO
+CCU,CDR/Industry,Carbon utilization accounting,ENGINEERING_SCENARIO
+forest_restoration,Land/CDR,"Tree planting, growth and ecological restoration",LEGACY_MECHANISTIC
+tree_harvest_durable_storage,Land/CDR,Strategic harvest/use/burial/durable wood,POLICY_SCENARIO
+wildfire_permanence,Land/Risk,Wildfire/drought permanence risk,POLICY_SCENARIO
+soil_emissions_carbon,Land,Soil emissions/carbon response,LEGACY_MECHANISTIC
+regenerative_agriculture,Land/Food,Soil/agronomic restoration pathway,POLICY_SCENARIO
+food_diet_omnivore,Food,Optimized omnivore pathway including meat,LITERATURE_SCREEN
+food_diet_mixed,Food,Mixed/EAT-Lancet-like pathway,LITERATURE_SCREEN
+food_diet_vegetarian_aquatic,Food,Vegetarian + dairy/eggs + aquatic foods,LITERATURE_SCREEN
+hunger_elimination,Food/Human,Dietary energy/protein access floor,POLICY_SCENARIO
+food_waste,Food/Waste,Food-waste recovery,LEGACY_MECHANISTIC
+wastewater_methane,Water/Energy,Wastewater methane capture and energy,LEGACY_MECHANISTIC
+desalination,Water,Clean-water desalination,ENGINEERING_SCENARIO
+water_reuse,Water,Wastewater treatment/reuse,ENGINEERING_SCENARIO
+universal_healthcare,Human/Health,Universal basic health-care resource envelope,POLICY_SCENARIO
+vaccines_antibiotics,Human/Health,"Vaccination, antibiotics and stewardship access",POLICY_SCENARIO
+mrna_cancer_vaccine_pipeline,Human/Health,mRNA cancer-vaccine R&D/access if validated/approved,POLICY_SCENARIO
+robot_doctors,AI/Health,AI-assisted and robotic healthcare,SERVICE_CAPACITY_SCENARIO
+robot_lawyers,AI/Justice,AI-assisted legal access,SERVICE_CAPACITY_SCENARIO
+legal_access,Human/Justice,Affordable legal information/representation access,POLICY_SCENARIO
+education,Human/Education,Universal education and vocational training,POLICY_SCENARIO
+robot_tutors,AI/Education,AI tutoring with educator oversight,SERVICE_CAPACITY_SCENARIO
+housing,Human/Housing,Housing resource/buildout screen,POLICY_SCENARIO
+robot_construction,AI/Infrastructure,Construction automation,ENGINEERING_SCENARIO
+robot_agriculture,AI/Food,Agricultural robotics,ENGINEERING_SCENARIO
+robot_environmental_mrv,AI/MRV,Robotic/satellite/drone MRV,ENGINEERING_SCENARIO
+robot_ocean_cleanup,AI/Ocean,Robotic ocean restoration/cleanup,ENGINEERING_SCENARIO
+robot_eldercare,AI/Health,Robotic eldercare/disability assistance,SERVICE_CAPACITY_SCENARIO
+energy_grid,Energy,"Electricity, grid adequacy and storage",LEGACY_MECHANISTIC
+tidal_energy,Energy,Tidal-energy screen,ENGINEERING_SCENARIO
+shipping_decarbonization,Transport,Shipping efficiency/wind/battery/H2/e-fuel/biofuel portfolio,ENGINEERING_SCENARIO
+aviation_decarbonization,Transport,Aviation electrification where feasible + low-carbon liquid fuel,ENGINEERING_SCENARIO
+industrial_materials,Materials,Steel/cement/aluminium/circularity,LEGACY_MECHANISTIC
+data_center_heat_reuse,Energy/AI,Distributed AI data-center waste-heat reuse,ENGINEERING_SCENARIO
+Los_Jardines_Cella,Implementation,Eight-town distributed restoration/AI demonstration archetype,ENGINEERING_SCENARIO
+Carbonite_stablecoin,Finance,Carbonite price-stable settlement cryptocurrency,POLICY_SCENARIO
+Proof_of_Rent,Finance/Compute,Proof of Rent processor-rental mechanism,POLICY_SCENARIO
+geotagged_tree_reserve,Finance/Forestry,Geotagged tree/timber natural-capital reserve,POLICY_SCENARIO
+restoration_charity,Finance/Human,Global restoration charity funded by settlement fees,POLICY_SCENARIO
+transaction_fee_finance,Finance,Settlement/cross-border fee funding,POLICY_SCENARIO
+country_equalizer,Finance/Governance,Equalizer for differing domestic restoration potential,POLICY_SCENARIO
+bank_transition,Finance,Bank/data-center/project-finance transition,POLICY_SCENARIO
+liquidity_stress,Finance,Monetary liquidity/reserve stress,LEGACY_MECHANISTIC
+sanctions_governance,Governance,Treaty sanctions/governance modes,POLICY_SCENARIO
+US_nonparticipation_stress,Governance/Finance,US non-participation adoption stress case,POLICY_SCENARIO
+protected_food_health_payments,Finance/Human,Basic food/health payments protected fee-free,POLICY_SCENARIO
+workforce_transition,Human/Economy,Financial/industrial workforce transition,POLICY_SCENARIO
+disaster_resilience,Human/Risk,Drought/shock resilience,POLICY_SCENARIO
+Africa_vulnerability_priority,Regional,Africa-focused vulnerability/resource-access reporting,LITERATURE_SCREEN
+population_scenarios,Human/Demography,Population planning and carrying-capacity screens,LITERATURE_SCREEN
+MRV_audit_chain,Governance/MRV,"Measurement, reporting, verification and chain of custody",POLICY_SCENARIO
+no_carbon_credit_finance,Finance,Financing architecture independent of carbon credits,POLICY_SCENARIO

@@ -1,0 +1,9 @@
+system,milestone,calendar,condition,status
+Atmospheric CO2,FaIR ensemble-median 280 ppm target in 2200,2200,Total post-2183 CDR 32.588 GtCO2/yr under Run10 inverse assumptions,EXTERNALLY_EXECUTED_INVERSE
+Atmospheric CO2,FaIR ensemble-median 280 ppm target in 2300,2300,Total post-2183 CDR 9.643 GtCO2/yr under Run10 inverse assumptions,EXTERNALLY_EXECUTED_INVERSE
+Atmospheric CO2,FaIR ensemble-median 280 ppm target in 2400,2400,Total post-2183 CDR 7.061 GtCO2/yr under Run10 inverse assumptions,EXTERNALLY_EXECUTED_INVERSE
+Coral reefs,Hard-coral-cover re-establishment,2036-2041 only if 2026 starts a durable low-disturbance window,No severe resetting heat event; regional heat-stress gate required,CONDITIONAL_LITERATURE_SCREEN
+Coral reefs,Ecological/community/structural recovery,2041-2056 only under same hypothetical safe start,Longer biological recovery and no severe resetting disturbance,CONDITIONAL_LITERATURE_SCREEN
+Fisheries,Typical managed stock rebuilding,~10 years after effective reform (median legacy literature screen),"Effective management, habitat, enforcement and stock-specific biology",LITERATURE_SCREEN_NOT_GLOBAL_FORECAST
+Ocean pH,Recovery toward higher pH,coupled to CO2 decline; no publication-grade threshold year,Temperature-coupled carbonate chemistry required,DIAGNOSTIC_ONLY
+Human flourishing,Food/health/water/legal access,policy/deployment dependent; no single physical restoration date,"financing, governance, workforce and infrastructure adoption",POLICY_SCENARIO
