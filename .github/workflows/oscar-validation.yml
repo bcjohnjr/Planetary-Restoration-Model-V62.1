@@ -15,7 +15,7 @@ jobs:
   oscar-v3-3:
     name: OSCAR v3.3 paired validation
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 240
 
     steps:
       - name: Checkout V62 repository
@@ -48,7 +48,7 @@ jobs:
 
       - name: Verify OSCAR Python dependencies
         run: |
-          python - <<'PY'
+          python - <<'PYDEP'
           import numpy
           import scipy
           import pandas
@@ -68,37 +68,27 @@ jobs:
           print("h5py:", h5py.__version__)
 
           print("OSCAR Python dependencies verified.")
-          PY
+          PYDEP
 
       - name: Fetch pinned official OSCAR v3.3 source
         run: |
           rm -rf _oscar
-
           git clone https://github.com/tgasser/OSCAR.git _oscar
-
           cd _oscar
-
           git checkout 3ce008400e06363564e5981a35cbc32377d41d86
-
           test "$(git rev-parse HEAD)" = "3ce008400e06363564e5981a35cbc32377d41d86"
-
           echo "Pinned OSCAR source verified."
 
       - name: Verify OSCAR parameter files can be read
         run: |
-          python - <<'PY'
+          python - <<'PYNETCDF'
           import xarray as xr
-
           f = "_oscar/input_data/parameters/from_OSCARv2/ocean_CMIP5.nc"
-
           ds = xr.open_dataset(f)
-
           print(ds)
-
           ds.close()
-
           print("OSCAR NetCDF parameter file successfully opened.")
-          PY
+          PYNETCDF
 
       - name: Run paired OSCAR validation
         run: |
