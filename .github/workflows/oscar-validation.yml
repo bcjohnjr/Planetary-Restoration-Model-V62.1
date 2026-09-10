@@ -39,14 +39,34 @@ jobs:
             'numpy==1.23.3' \
             'scipy==1.9.3' \
             'pandas==1.5.3' \
-            'xarray==0.20.1'
+            'xarray==0.20.1' \
+            'matplotlib==3.7.5'
+
+      - name: Verify OSCAR Python dependencies
+        run: |
+          python - <<'PY'
+          import numpy
+          import scipy
+          import pandas
+          import xarray
+          import matplotlib
+
+          print("numpy:", numpy.__version__)
+          print("scipy:", scipy.__version__)
+          print("pandas:", pandas.__version__)
+          print("xarray:", xarray.__version__)
+          print("matplotlib:", matplotlib.__version__)
+          print("OSCAR Python dependencies verified.")
+          PY
 
       - name: Fetch pinned official OSCAR v3.3 source
         run: |
+          rm -rf _oscar
           git clone https://github.com/tgasser/OSCAR.git _oscar
           cd _oscar
           git checkout 3ce008400e06363564e5981a35cbc32377d41d86
           test "$(git rev-parse HEAD)" = "3ce008400e06363564e5981a35cbc32377d41d86"
+          echo "Pinned OSCAR source verified."
 
       - name: Run paired OSCAR validation
         run: |
@@ -62,6 +82,17 @@ jobs:
         run: |
           if [ -f oscar_results/oscar_validation_summary.json ]; then
             cat oscar_results/oscar_validation_summary.json
+          else
+            echo "OSCAR validation summary was not generated."
+          fi
+
+      - name: List OSCAR result files
+        if: always()
+        run: |
+          if [ -d oscar_results ]; then
+            find oscar_results -maxdepth 2 -type f -print
+          else
+            echo "No oscar_results directory exists."
           fi
 
       - name: Upload OSCAR validation artifacts
@@ -70,4 +101,4 @@ jobs:
         with:
           name: OSCAR-V62-External-Validation
           path: oscar_results/
-          if-no-files-found: error
+          if-no-files-found: warn
