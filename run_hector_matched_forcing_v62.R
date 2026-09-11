@@ -370,6 +370,26 @@ run_once <- function(
   )
  
   #
+  # Finalize year 2026 under Hector's own natural (unconstrained)
+  # forcing before FTOT_CONSTRAIN is ever set. Hector's forcing
+  # override guard only checks runToDate <= Ftot_constrain.lastdate(),
+  # not runToDate >= firstdate(), so once any constraint value exists
+  # for 2027+, Hector will also silently override year 2026 by
+  # extrapolating (clamping to) the 2027 value. That 2027 value differs
+  # between the ON and OFF branches, which corrupted the shared 2026
+  # state and broke the common-state check. Running to 2026 here, before
+  # FTOT_CONSTRAIN is created below, locks in 2026 under natural forcing
+  # for both branches identically.
+  #
+ 
+  invisible(
+    run(
+      core,
+      2026
+    )
+  )
+ 
+  #
   # Match total forcing only when a constraint vector has
   # been supplied.
   #
