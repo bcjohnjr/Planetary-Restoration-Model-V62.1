@@ -8,11 +8,11 @@ from the same FaIR state while forcing *every FaIR ensemble member* to see the
 same non-CO2 effective radiative forcing (ERF) trajectory after 2026.
 
 The target trajectory is the median non-CO2 ERF from FaIR's official
-"medium-extension" calibrated-constrained setup.  A direct forcing-driven
-species is used as an additive bookkeeping adjustment so that, after 2026,
-(sum of all non-CO2 forcing contributions) == target for every configuration.
-The adjustment is a diagnostic forcing harmonization device, not a physical
-claim about the chosen bookkeeping species.
+"medium-extension" calibrated-constrained setup. A dedicated synthetic
+forcing-only species (type="unspecified") is added as an additive bookkeeping
+adjustment so that, after 2026, (sum of all non-CO2 forcing contributions) ==
+target for every configuration. The synthetic species is a diagnostic forcing
+harmonization device only and has no physical interpretation.
 
 CO2 is left emissions-driven.  The V62 annual carbon pathway is used exactly:
   ON  = gross + permafrost + stored-carbon reversal - CDR
@@ -46,6 +46,9 @@ END_YEAR = 2300
 MATCH_AFTER_YEAR = 2026
 MATCH_TOL = 1e-7
 MAX_MATCH_ITERS = 5
+BOOKKEEPING_SPECIES = 'Matched non-CO2 forcing adjustment'
+RUNTIME_SP = ROOT / '_matched_species_configs_runtime.csv'
+RUNTIME_FO = ROOT / '_matched_forcing_runtime.csv'
 CONV_GTCO2_PER_PPM = 2.124 * (44.009 / 12.011)
 
 for p in (PAR, SP, EM, FO, TR):
@@ -100,15 +103,61 @@ def carbon_paths(end=END_YEAR):
     return on, off, cdr
 
 
+def prepare_runtime_forcing_carrier():
+    # FaIR calibration 1.4.1 has Solar and Volcanic as its only native
+    # forcing-driven species. Rather than mislabel a harmonization residual as
+    # either physical solar or volcanic forcing, add an explicit synthetic
+    # forcing-only species. FaIR v2.2.4 explicitly permits type='unspecified'
+    # with input_mode='forcing'.
+    sp = pd.read_csv(SP)
+    if BOOKKEEPING_SPECIES not in set(sp['name'].astype(str)):
+        base = sp.loc[sp['name'] == 'Solar'].iloc[0].copy()
+        base['name'] = BOOKKEEPING_SPECIES
+        base['type'] = 'unspecified'
+        base['input_mode'] = 'forcing'
+        base['greenhouse_gas'] = 0
+        base['aerosol_chemistry_from_emissions'] = 0
+        base['aerosol_chemistry_from_concentration'] = 0
+        base['tropospheric_adjustment'] = 0
+        base['forcing_efficacy'] = 1
+        base['forcing_temperature_feedback'] = 0
+        base['forcing_scale'] = 1
+        sp = pd.concat([sp, pd.DataFrame([base])], ignore_index=True)
+    sp.to_csv(RUNTIME_SP, index=False)
+
+    fo = pd.read_csv(FO)
+    fo.columns = fo.columns.str.lower()
+    if BOOKKEEPING_SPECIES not in set(fo['variable'].astype(str)):
+        sel = (
+            (fo['scenario'] == SCENARIO)
+            & (fo['variable'] == 'Solar')
+            & (fo['region'].astype(str).str.lower() == 'world')
+        )
+        if not bool(sel.any()):
+            raise RuntimeError('Could not find Solar forcing row to template synthetic bookkeeping forcing')
+        row = fo.loc[sel].iloc[0].copy()
+        row['variable'] = BOOKKEEPING_SPECIES
+        for col in fo.columns:
+            try:
+                float(col)
+            except (TypeError, ValueError):
+                continue
+            row[col] = 0.0
+        fo = pd.concat([fo, pd.DataFrame([row])], ignore_index=True)
+    fo.to_csv(RUNTIME_FO, index=False)
+    return RUNTIME_SP, RUNTIME_FO
+
+
 def build_model(end=END_YEAR):
+    runtime_sp, runtime_fo = prepare_runtime_forcing_carrier()
     f = FAIR(ch4_method='Thornhill2021')
     f.define_time(1750, end, 1)
     f.define_scenarios([SCENARIO])
     f.define_configs(cfg.index)
-    species, props = read_properties(filename=SP)
+    species, props = read_properties(filename=runtime_sp)
     f.define_species(species, props)
     f.allocate()
-    f.fill_from_csv(emissions_file=EM, forcing_file=FO)
+    f.fill_from_csv(emissions_file=EM, forcing_file=runtime_fo)
     fill(
         f.forcing,
         f.forcing.sel(specie='Volcanic') * cfg['forcing_scale[Volcanic]'].values.squeeze(),
@@ -119,7 +168,7 @@ def build_model(end=END_YEAR):
         f.forcing.sel(specie='Solar') * cfg['forcing_scale[Solar]'].values.squeeze(),
         specie='Solar',
     )
-    f.fill_species_configs(SP)
+    f.fill_species_configs(runtime_sp)
     f.override_defaults(PAR)
     initialise(f.concentration, f.species_configs['baseline_concentration'])
     initialise(f.forcing, 0)
@@ -143,22 +192,12 @@ def override_carbon(f, net):
 
 
 def choose_adjustment_species(species, props):
-    preferred = [
-        'Contrails',
-        'Light absorbing particles on snow and ice',
-        'Land use',
-    ]
-    for s in preferred:
-        if s in props and props[s].get('input_mode') == 'forcing':
-            return s
-    candidates = [
-        s for s in species
-        if s not in ('CO2', 'Solar', 'Volcanic')
-        and props.get(s, {}).get('input_mode') == 'forcing'
-    ]
-    if not candidates:
-        raise RuntimeError('No suitable forcing-driven non-CO2 bookkeeping species found in FaIR properties')
-    return candidates[0]
+    if BOOKKEEPING_SPECIES not in species:
+        raise RuntimeError(f'Synthetic forcing carrier {BOOKKEEPING_SPECIES!r} is absent')
+    p = props.get(BOOKKEEPING_SPECIES, {})
+    if p.get('type') != 'unspecified' or p.get('input_mode') != 'forcing':
+        raise RuntimeError(f'Invalid synthetic forcing-carrier properties: {p}')
+    return BOOKKEEPING_SPECIES
 
 
 def run_model(net, adjustment=None, adjustment_species=None):
@@ -320,7 +359,7 @@ def main():
         'experiment': 'V62 removal-ON/OFF with harmonized non-CO2 ERF after 2026',
         'matched_nonco2_target': 'median FaIR medium-extension non-CO2 ERF; same scalar target imposed on all FaIR configs and exported to Hector',
         'adjustment_bookkeeping_species': adjustment_species,
-        'bookkeeping_warning': 'The adjustment species is only an additive forcing carrier; its physical identity is not interpreted.',
+        'bookkeeping_warning': 'The synthetic unspecified species is only an additive forcing carrier and has no physical interpretation.',
         'match_starts': 2027,
         'canonical_cdr_2026_2183_gtco2': CAN_CDR,
         'peak_cdr_2026_2183_gtco2_per_year': PEAK_CDR,
