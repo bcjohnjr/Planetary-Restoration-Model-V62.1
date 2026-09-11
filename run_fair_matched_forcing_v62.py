@@ -45,8 +45,9 @@ SCENARIO = 'medium-extension'
 END_YEAR = 2300
 MATCH_AFTER_YEAR = 2026
 MATCH_TOL = 1e-7
-MAX_MATCH_ITERS = 5
+MAX_MATCH_ITERS = 30
 BOOKKEEPING_SPECIES = 'Matched non-CO2 forcing adjustment'
+MATCHED_FORCING_SCRIPT_REVISION = 'V62.1-fair-match-convergence-fix-2026-09-11'
 RUNTIME_SP = ROOT / '_matched_species_configs_runtime.csv'
 RUNTIME_FO = ROOT / '_matched_forcing_runtime.csv'
 CONV_GTCO2_PER_PPM = 2.124 * (44.009 / 12.011)
@@ -249,6 +250,11 @@ def fit_matched_case(net, target, adjustment_species):
         residual = target[:, None] - non
         max_abs = float(np.max(np.abs(residual[mask, :])))
         audit.append({'iteration': it + 1, 'max_abs_nonco2_forcing_error_wm2': max_abs})
+        print(
+            f'  forcing-match iteration {it + 1}/{MAX_MATCH_ITERS}: '
+            f'max |residual| = {max_abs:.12g} W/m2',
+            flush=True,
+        )
         final = (f, species, non)
         if max_abs <= MATCH_TOL:
             break
