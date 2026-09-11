@@ -21,20 +21,38 @@ options(error = function() {
   quit(save = "no", status = 1, runLast = FALSE)
 })
 
-say <- function(...) { cat(sprintf(...), "\n"); flush.console() }
-fail <- function(...) stop(sprintf(...), call. = FALSE)
+say <- function(...) {
+  cat(sprintf(...), "\n")
+  flush.console()
+}
+
+fail <- function(...) {
+  stop(sprintf(...), call. = FALSE)
+}
 
 if (as.character(packageVersion("hector")) != "3.5.0") {
-  fail("Expected Hector 3.5.0; found %s", as.character(packageVersion("hector")))
+  fail(
+    "Expected Hector 3.5.0; found %s",
+    as.character(packageVersion("hector"))
+  )
 }
 
 traj_path <- "external_validation_net_co2_trajectory.csv"
 target_path <- "fair_matched_nonco2_forcing.csv"
 
-if (!file.exists(traj_path)) fail("Missing %s", traj_path)
-if (!file.exists(target_path)) fail("Missing %s", target_path)
+if (!file.exists(traj_path)) {
+  fail("Missing %s", traj_path)
+}
 
-x <- read.csv(traj_path, check.names = FALSE, stringsAsFactors = FALSE)
+if (!file.exists(target_path)) {
+  fail("Missing %s", target_path)
+}
+
+x <- read.csv(
+  traj_path,
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
 
 need <- c(
   "year",
@@ -48,7 +66,10 @@ need <- c(
 miss <- setdiff(need, names(x))
 
 if (length(miss)) {
-  fail("Trajectory missing columns: %s", paste(miss, collapse = ", "))
+  fail(
+    "Trajectory missing columns: %s",
+    paste(miss, collapse = ", ")
+  )
 }
 
 x <- x[order(x$year), ]
@@ -67,33 +88,55 @@ mass_check <-
   x$stored_carbon_reversal_gtco2 -
   x$cdr_gtco2
 
-mass_err <- max(abs(mass_check - x$net_co2_gtco2))
+mass_err <- max(
+  abs(
+    mass_check -
+    x$net_co2_gtco2
+  )
+)
 
 if (mass_err >= 1e-9) {
-  fail("Mass balance failed: %.12g GtCO2", mass_err)
+  fail(
+    "Mass balance failed: %.12g GtCO2",
+    mass_err
+  )
 }
 
 last <- x[nrow(x), ]
 
 if (max(x$year) < 2300) {
+
   yy <- (max(x$year) + 1L):2300L
 
   ext <- data.frame(
     year = yy,
-    gross_co2_gtco2 = rep(last$gross_co2_gtco2, length(yy)),
-    permafrost_co2_gtco2 = rep(last$permafrost_co2_gtco2, length(yy)),
-    stored_carbon_reversal_gtco2 = rep(last$stored_carbon_reversal_gtco2, length(yy)),
-    cdr_gtco2 = rep(last$cdr_gtco2, length(yy)),
-    net_co2_gtco2 = rep(last$net_co2_gtco2, length(yy))
+    gross_co2_gtco2 =
+      rep(last$gross_co2_gtco2, length(yy)),
+    permafrost_co2_gtco2 =
+      rep(last$permafrost_co2_gtco2, length(yy)),
+    stored_carbon_reversal_gtco2 =
+      rep(last$stored_carbon_reversal_gtco2, length(yy)),
+    cdr_gtco2 =
+      rep(last$cdr_gtco2, length(yy)),
+    net_co2_gtco2 =
+      rep(last$net_co2_gtco2, length(yy))
   )
 
-  x <- rbind(x[, names(ext)], ext)
+  x <- rbind(
+    x[, names(ext)],
+    ext
+  )
 }
 
 yrs <- as.numeric(x$year)
 
-if (!identical(yrs, as.numeric(2026:2300))) {
-  fail("Extended trajectory must be annual 2026-2300")
+if (!identical(
+  yrs,
+  as.numeric(2026:2300)
+)) {
+  fail(
+    "Extended trajectory must be annual 2026-2300"
+  )
 }
 
 ft <- read.csv(
@@ -102,20 +145,36 @@ ft <- read.csv(
   stringsAsFactors = FALSE
 )
 
-if (!all(c("year", "matched_nonco2_forcing_wm2") %in% names(ft))) {
-  fail("Target forcing CSV has wrong columns")
+if (!all(
+  c(
+    "year",
+    "matched_nonco2_forcing_wm2"
+  ) %in% names(ft)
+)) {
+  fail(
+    "Target forcing CSV has wrong columns"
+  )
 }
 
 ft <- ft[order(ft$year), ]
 
 match_years <- 2027:2300
 
-target <- ft$matched_nonco2_forcing_wm2[
-  match(match_years, ft$year)
-]
+target <-
+  ft$matched_nonco2_forcing_wm2[
+    match(
+      match_years,
+      ft$year
+    )
+  ]
 
-if (length(target) != length(match_years) || any(!is.finite(target))) {
-  fail("Common non-CO2 forcing target missing/non-finite over 2027-2300")
+if (
+  length(target) != length(match_years) ||
+  any(!is.finite(target))
+) {
+  fail(
+    "Common non-CO2 forcing target missing/non-finite over 2027-2300"
+  )
 }
 
 co2_to_c <- 12.011 / 44.009
@@ -125,9 +184,19 @@ gross_source_gtco2 <-
   x$permafrost_co2_gtco2 +
   x$stored_carbon_reversal_gtco2
 
-gross_c <- gross_source_gtco2 * co2_to_c
-cdr_c <- x$cdr_gtco2 * co2_to_c
-zero_c <- rep(0, length(yrs))
+gross_c <-
+  gross_source_gtco2 *
+  co2_to_c
+
+cdr_c <-
+  x$cdr_gtco2 *
+  co2_to_c
+
+zero_c <-
+  rep(
+    0,
+    length(yrs)
+  )
 
 ini <- system.file(
   "input",
@@ -135,19 +204,56 @@ ini <- system.file(
   package = "hector"
 )
 
-if (!nzchar(ini) || !file.exists(ini)) {
-  fail("hector_ssp245.ini not found")
+if (
+  !nzchar(ini) ||
+  !file.exists(ini)
+) {
+  fail(
+    "hector_ssp245.ini not found"
+  )
 }
 
-unit_ffi <- getunits(FFI_EMISSIONS())
-unit_luc <- getunits(LUC_EMISSIONS())
-unit_luc_uptake <- getunits(LUC_UPTAKE())
-unit_daccs <- getunits(DACCS_UPTAKE())
+unit_ffi <-
+  getunits(
+    FFI_EMISSIONS()
+  )
 
-set_checked <- function(core, dates, var, values, unit, label) {
+unit_luc <-
+  getunits(
+    LUC_EMISSIONS()
+  )
+
+unit_luc_uptake <-
+  getunits(
+    LUC_UPTAKE()
+  )
+
+unit_daccs <-
+  getunits(
+    DACCS_UPTAKE()
+  )
+
+set_checked <- function(
+  core,
+  dates,
+  var,
+  values,
+  unit,
+  label
+) {
+
   tryCatch(
-    setvar(core, dates, var, values, unit),
+
+    setvar(
+      core,
+      dates,
+      var,
+      values,
+      unit
+    ),
+
     error = function(e) {
+
       fail(
         "setvar failed for %s: %s",
         label,
@@ -157,13 +263,22 @@ set_checked <- function(core, dates, var, values, unit, label) {
   )
 }
 
-fetch_one <- function(df, varname) {
+fetch_one <- function(
+  df,
+  varname
+) {
+
   z <- df[
     df$variable == varname,
-    c("year", "value")
+    c(
+      "year",
+      "value"
+    )
   ]
 
-  z <- z[order(z$year), ]
+  z <- z[
+    order(z$year),
+  ]
 
   z
 }
@@ -173,6 +288,7 @@ run_once <- function(
   removal_on,
   ftotal_constraint = NULL
 ) {
+
   core <- newcore(
     ini,
     suppresslogging = TRUE,
@@ -180,11 +296,28 @@ run_once <- function(
   )
 
   on.exit(
-    try(shutdown(core), silent = TRUE),
+    try(
+      shutdown(core),
+      silent = TRUE
+    ),
     add = TRUE
   )
 
-  invisible(run(core, 2025))
+  #
+  # Preserve Hector's own historical state through 2025.
+  #
+
+  invisible(
+    run(
+      core,
+      2025
+    )
+  )
+
+  #
+  # Future fossil/industrial + permafrost + stored-carbon
+  # reversal emissions.
+  #
 
   set_checked(
     core,
@@ -194,6 +327,11 @@ run_once <- function(
     unit_ffi,
     "FFI gross source"
   )
+
+  #
+  # No independent LUC emissions are added because the V62
+  # trajectory already defines the carbon source terms.
+  #
 
   set_checked(
     core,
@@ -213,18 +351,48 @@ run_once <- function(
     "LUC uptake=0"
   )
 
+  #
+  # Removal ON uses the V62 CDR trajectory.
+  # Removal OFF sets DACCS uptake to zero.
+  #
+
   set_checked(
     core,
     yrs,
     DACCS_UPTAKE(),
     if (removal_on) cdr_c else zero_c,
     unit_daccs,
-    if (removal_on) "DACCS=V62 CDR" else "DACCS=0"
+    if (removal_on) {
+      "DACCS=V62 CDR"
+    } else {
+      "DACCS=0"
+    }
   )
 
+  #
+  # Match total forcing only when a constraint vector has
+  # been supplied.
+  #
+
   if (!is.null(ftotal_constraint)) {
-    if (length(ftotal_constraint) != length(match_years)) {
-      fail("Bad Ftot constraint length")
+
+    if (
+      length(ftotal_constraint) !=
+      length(match_years)
+    ) {
+      fail(
+        "Bad Ftot constraint length"
+      )
+    }
+
+    if (
+      any(!is.finite(
+        ftotal_constraint
+      ))
+    ) {
+      fail(
+        "Non-finite Ftot constraint"
+      )
     }
 
     set_checked(
@@ -237,7 +405,12 @@ run_once <- function(
     )
   }
 
-  invisible(run(core, 2300))
+  invisible(
+    run(
+      core,
+      2300
+    )
+  )
 
   out <- fetchvars(
     core,
@@ -252,164 +425,725 @@ run_once <- function(
 
   list(
     output = out,
-    co2 = fetch_one(out, CONCENTRATIONS_CO2()),
-    tas = fetch_one(out, GLOBAL_TAS()),
-    rfco2 = fetch_one(out, RF_CO2()),
-    rftot = fetch_one(out, RF_TOTAL())
+
+    co2 = fetch_one(
+      out,
+      CONCENTRATIONS_CO2()
+    ),
+
+    tas = fetch_one(
+      out,
+      GLOBAL_TAS()
+    ),
+
+    rfco2 = fetch_one(
+      out,
+      RF_CO2()
+    ),
+
+    rftot = fetch_one(
+      out,
+      RF_TOTAL()
+    )
   )
 }
 
 # =============================================================================
-# UNDER-RELAXED MATCHED-FORCING SOLVER
+# ADAPTIVE ACCEPTED-STATE MATCHED-FORCING SOLVER
 #
-# The old implementation used the complete fixed-point update:
+# Required fixed point:
 #
-#   constraint <- rfco2 + target
+#   constraint = RF_CO2(constraint) + target_nonCO2
 #
-# which produced numerical oscillation.
+# because:
 #
-# This uses the same fixed point but only applies 25% of the correction at
-# each iteration. The scientific acceptance tolerance remains 1e-5 W/m2.
+#   RF_TOTAL - RF_CO2 = target_nonCO2
+#
+# The earlier full Picard update oscillated.
+#
+# A fixed 0.25 under-relaxation step was then tried.
+#
+# This implementation instead:
+#
+#   1. retains the last accepted Hector state;
+#   2. proposes a damped fixed-point update;
+#   3. accepts the new state only when the maximum forcing
+#      mismatch decreases;
+#   4. halves alpha when a trial makes the solution worse;
+#   5. slowly increases alpha after a successful step;
+#   6. preserves the scientific acceptance tolerance of
+#      1e-5 W/m2.
+#
+# Each candidate is evaluated by a completely new Hector core,
+# so a rejected trial cannot alter a later accepted run.
 # =============================================================================
 
 fit_case <- function(
   label,
   removal_on,
   tol = 1e-5,
-  max_iter = 100,
-  relax = 0.25
+  max_iter = 400L,
+  alpha_initial = 0.10,
+  alpha_min = 0.001,
+  alpha_max = 0.25
 ) {
-  say("Starting %s unconstrained seed", label)
 
-  if (!is.finite(relax) || relax <= 0 || relax > 1) {
-    fail("Invalid relaxation factor %.9g", relax)
+  say("")
+  say(
+    "============================================================"
+  )
+  say(
+    "Starting %s",
+    label
+  )
+  say(
+    "Scientific forcing tolerance = %.9g W/m2",
+    tol
+  )
+  say(
+    "Adaptive relaxation: initial=%.6f min=%.6f max=%.6f",
+    alpha_initial,
+    alpha_min,
+    alpha_max
+  )
+  say(
+    "============================================================"
+  )
+
+  if (
+    !is.finite(tol) ||
+    tol <= 0
+  ) {
+    fail(
+      "Invalid tolerance %.9g",
+      tol
+    )
   }
 
+  if (
+    !is.finite(alpha_initial) ||
+    !is.finite(alpha_min) ||
+    !is.finite(alpha_max) ||
+    alpha_initial <= 0 ||
+    alpha_min <= 0 ||
+    alpha_max <= 0 ||
+    alpha_min > alpha_initial ||
+    alpha_initial > alpha_max ||
+    alpha_max > 1
+  ) {
+    fail(
+      paste0(
+        "Invalid adaptive relaxation parameters: ",
+        "initial=%.9g min=%.9g max=%.9g"
+      ),
+      alpha_initial,
+      alpha_min,
+      alpha_max
+    )
+  }
+
+  #
+  # Run the branch once without future total-forcing
+  # constraints. Hector supplies its own CO2 forcing.
+  #
+
+  say(
+    "%s: generating unconstrained seed",
+    label
+  )
+
   seed <- run_once(
-    paste0(label, " seed"),
+    paste0(
+      label,
+      " seed"
+    ),
     removal_on,
     NULL
   )
 
-  rf_seed <- seed$rfco2$value[
-    match(match_years, seed$rfco2$year)
-  ]
+  rf_seed <-
+    seed$rfco2$value[
+      match(
+        match_years,
+        seed$rfco2$year
+      )
+    ]
 
-  if (any(!is.finite(rf_seed))) {
-    fail("Non-finite seed CO2 forcing")
+  if (
+    length(rf_seed) !=
+      length(match_years) ||
+    any(!is.finite(rf_seed))
+  ) {
+    fail(
+      "Non-finite or incomplete seed CO2 forcing in %s",
+      label
+    )
   }
 
-  constraint <- rf_seed + target
+  #
+  # First estimate of total forcing:
+  #
+  #   Hector CO2 RF + common non-CO2 target
+  #
 
-  history <- list()
-  final <- NULL
+  constraint <-
+    rf_seed +
+    target
 
-  for (it in seq_len(max_iter)) {
-    say("%s forcing iteration %d", label, it)
+  #
+  # Evaluate one constraint vector and calculate the
+  # effective non-CO2 forcing mismatch.
+  #
 
-    z <- run_once(
-      sprintf("%s iter%d", label, it),
-      removal_on,
-      constraint
-    )
+  evaluate_constraint <- function(
+    constraint_vector,
+    run_label
+  ) {
 
-    rfco2 <- z$rfco2$value[
-      match(match_years, z$rfco2$year)
-    ]
-
-    rftot <- z$rftot$value[
-      match(match_years, z$rftot$year)
-    ]
-
-    if (any(!is.finite(rfco2)) || any(!is.finite(rftot))) {
-      fail("Non-finite forcing in %s", label)
+    if (
+      length(constraint_vector) !=
+      length(match_years)
+    ) {
+      fail(
+        "Bad constraint-vector length in %s",
+        label
+      )
     }
 
-    eff_non <- rftot - rfco2
-    residual <- eff_non - target
-    max_res <- max(abs(residual))
+    if (
+      any(!is.finite(
+        constraint_vector
+      ))
+    ) {
+      fail(
+        "Non-finite constraint vector in %s",
+        label
+      )
+    }
 
-    worst_index <- which.max(abs(residual))
-    worst_year <- match_years[worst_index]
-    worst_residual <- residual[worst_index]
-
-    next_constraint <- rfco2 + target
-    raw_update <- next_constraint - constraint
-    max_update <- max(abs(raw_update))
-
-    history[[it]] <- list(
-      iteration = it,
-      relaxation_factor = relax,
-      max_abs_nonco2_error_wm2 = max_res,
-      max_constraint_update_wm2 = max_update,
-      worst_year = worst_year,
-      worst_residual_wm2 = worst_residual
+    z <- run_once(
+      run_label,
+      removal_on,
+      constraint_vector
     )
 
-    say(
-      "  max |effective non-CO2 - target| = %.9g W/m2",
-      max_res
-    )
+    rfco2 <-
+      z$rfco2$value[
+        match(
+          match_years,
+          z$rfco2$year
+        )
+      ]
 
-    say(
-      "  worst year = %d; signed residual = %.9g W/m2",
-      worst_year,
-      worst_residual
-    )
+    rftot <-
+      z$rftot$value[
+        match(
+          match_years,
+          z$rftot$year
+        )
+      ]
 
-    say(
-      "  raw fixed-point update = %.9g W/m2; relaxation = %.3f",
-      max_update,
-      relax
-    )
+    if (
+      length(rfco2) !=
+        length(match_years) ||
+      length(rftot) !=
+        length(match_years) ||
+      any(!is.finite(rfco2)) ||
+      any(!is.finite(rftot))
+    ) {
+      fail(
+        "Non-finite or incomplete forcing in %s",
+        label
+      )
+    }
 
-    final <- z
+    effective_nonco2 <-
+      rftot -
+      rfco2
 
-    if (max_res <= tol) {
-      say(
-        "%s converged after %d iterations: %.9g <= %.9g W/m2",
-        label,
-        it,
+    residual <-
+      effective_nonco2 -
+      target
+
+    max_res <-
+      max(
+        abs(residual)
+      )
+
+    worst_index <-
+      which.max(
+        abs(residual)
+      )
+
+    worst_year <-
+      match_years[
+        worst_index
+      ]
+
+    worst_residual <-
+      residual[
+        worst_index
+      ]
+
+    #
+    # Independent diagnostic:
+    #
+    # Does Hector RF_TOTAL actually follow the requested
+    # FTOT_CONSTRAIN vector?
+    #
+
+    forcing_tracking_error <-
+      max(
+        abs(
+          rftot -
+          constraint_vector
+        )
+      )
+
+    list(
+      run = z,
+
+      constraint =
+        constraint_vector,
+
+      rfco2 =
+        rfco2,
+
+      rftot =
+        rftot,
+
+      effective_nonco2 =
+        effective_nonco2,
+
+      residual =
+        residual,
+
+      max_res =
         max_res,
-        tol
+
+      worst_index =
+        worst_index,
+
+      worst_year =
+        worst_year,
+
+      worst_residual =
+        worst_residual,
+
+      forcing_tracking_error =
+        forcing_tracking_error
+    )
+  }
+
+  #
+  # First constrained state.
+  #
+
+  current <- evaluate_constraint(
+    constraint,
+    paste0(
+      label,
+      " initial"
+    )
+  )
+
+  say(
+    paste0(
+      "%s initial: max residual=%.9g W/m2; ",
+      "worst year=%d; signed residual=%.9g W/m2; ",
+      "FTOT tracking error=%.9g W/m2"
+    ),
+    label,
+    current$max_res,
+    current$worst_year,
+    current$worst_residual,
+    current$forcing_tracking_error
+  )
+
+  if (
+    !is.finite(
+      current$max_res
+    )
+  ) {
+    fail(
+      "%s produced non-finite initial forcing residual",
+      label
+    )
+  }
+
+  alpha <-
+    alpha_initial
+
+  history <- list()
+
+  converged <- FALSE
+
+  #
+  # Adaptive accepted-state fixed-point iterations.
+  #
+
+  for (
+    it in seq_len(max_iter)
+  ) {
+
+    say("")
+    say(
+      "%s accepted-state iteration %d",
+      label,
+      it
+    )
+
+    say(
+      paste0(
+        "  current max residual = %.9g W/m2; ",
+        "worst year = %d; signed residual = %.9g W/m2"
+      ),
+      current$max_res,
+      current$worst_year,
+      current$worst_residual
+    )
+
+    say(
+      "  current FTOT tracking error = %.9g W/m2",
+      current$forcing_tracking_error
+    )
+
+    say(
+      "  proposed relaxation alpha = %.9g",
+      alpha
+    )
+
+    #
+    # Save the currently accepted state.
+    #
+
+    history[[
+      length(history) + 1L
+    ]] <- list(
+      iteration =
+        it,
+
+      state =
+        "accepted",
+
+      relaxation_factor =
+        alpha,
+
+      max_abs_nonco2_error_wm2 =
+        current$max_res,
+
+      worst_year =
+        current$worst_year,
+
+      worst_residual_wm2 =
+        current$worst_residual,
+
+      ftot_tracking_error_wm2 =
+        current$forcing_tracking_error
+    )
+
+    #
+    # Exact scientific acceptance condition.
+    #
+
+    if (
+      current$max_res <= tol
+    ) {
+
+      converged <- TRUE
+
+      say(
+        paste0(
+          "%s CONVERGED: %.9g <= %.9g W/m2 ",
+          "after %d accepted-state iterations"
+        ),
+        label,
+        current$max_res,
+        tol,
+        it
       )
 
       break
     }
 
-    constraint <- constraint + relax * raw_update
+    #
+    # Fixed-point target generated by Hector's CURRENT
+    # branch-specific CO2 forcing.
+    #
 
-    if (any(!is.finite(constraint))) {
+    fixed_point_target <-
+      current$rfco2 +
+      target
+
+    direction <-
+      fixed_point_target -
+      current$constraint
+
+    if (
+      any(!is.finite(
+        direction
+      ))
+    ) {
       fail(
-        "Non-finite damped constraint in %s at iteration %d",
+        "Non-finite fixed-point direction in %s at iteration %d",
         label,
         it
       )
     }
+
+    raw_update <-
+      max(
+        abs(direction)
+      )
+
+    say(
+      "  maximum raw fixed-point update = %.9g W/m2",
+      raw_update
+    )
+
+    accepted <-
+      FALSE
+
+    trial_alpha <-
+      min(
+        alpha,
+        alpha_max
+      )
+
+    trial_number <-
+      0L
+
+    #
+    # Backtracking:
+    #
+    # Never alter CURRENT unless the trial actually improves
+    # the maximum forcing residual.
+    #
+
+    while (
+      trial_alpha >= alpha_min
+    ) {
+
+      trial_number <-
+        trial_number +
+        1L
+
+      trial_constraint <-
+        current$constraint +
+        trial_alpha *
+        direction
+
+      trial <- evaluate_constraint(
+        trial_constraint,
+        sprintf(
+          "%s iter%d trial%d alpha%.8f",
+          label,
+          it,
+          trial_number,
+          trial_alpha
+        )
+      )
+
+      say(
+        paste0(
+          "    trial %d alpha=%.9g: ",
+          "residual=%.9g W/m2; ",
+          "worst year=%d; ",
+          "tracking=%.9g W/m2"
+        ),
+        trial_number,
+        trial_alpha,
+        trial$max_res,
+        trial$worst_year,
+        trial$forcing_tracking_error
+      )
+
+      #
+      # Accept only an actual improvement.
+      #
+
+      if (
+        is.finite(
+          trial$max_res
+        ) &&
+        trial$max_res <
+          current$max_res
+      ) {
+
+        improvement <-
+          current$max_res -
+          trial$max_res
+
+        say(
+          paste0(
+            "    ACCEPT alpha=%.9g; ",
+            "residual improved by %.9g W/m2"
+          ),
+          trial_alpha,
+          improvement
+        )
+
+        history[[
+          length(history) + 1L
+        ]] <- list(
+          iteration =
+            it,
+
+          state =
+            "accepted_update",
+
+          relaxation_factor =
+            trial_alpha,
+
+          max_abs_nonco2_error_wm2 =
+            trial$max_res,
+
+          worst_year =
+            trial$worst_year,
+
+          worst_residual_wm2 =
+            trial$worst_residual,
+
+          ftot_tracking_error_wm2 =
+            trial$forcing_tracking_error
+        )
+
+        current <-
+          trial
+
+        accepted <-
+          TRUE
+
+        #
+        # After success, allow alpha to increase slowly,
+        # but never above alpha_max.
+        #
+
+        alpha <-
+          min(
+            alpha_max,
+            trial_alpha * 1.25
+          )
+
+        break
+      }
+
+      say(
+        "    REJECT alpha=%.9g",
+        trial_alpha
+      )
+
+      #
+      # Try a smaller step from the SAME accepted state.
+      #
+
+      trial_alpha <-
+        trial_alpha /
+        2
+    }
+
+    if (!accepted) {
+
+      fail(
+        paste0(
+          "%s matched-forcing solver stalled at iteration %d. ",
+          "Best residual %.9g W/m2 at year %d; ",
+          "no improving trial was found down to alpha %.9g. ",
+          "FTOT tracking error %.9g W/m2."
+        ),
+        label,
+        it,
+        current$max_res,
+        current$worst_year,
+        alpha_min,
+        current$forcing_tracking_error
+      )
+    }
+
+    #
+    # A newly accepted state may already satisfy tolerance.
+    # This check prevents a successful final allowed update
+    # from being incorrectly labelled non-converged.
+    #
+
+    if (
+      current$max_res <= tol
+    ) {
+
+      converged <- TRUE
+
+      say(
+        paste0(
+          "%s CONVERGED after accepted update: ",
+          "%.9g <= %.9g W/m2"
+        ),
+        label,
+        current$max_res,
+        tol
+      )
+
+      break
+    }
   }
 
-  if (is.null(final)) {
-    fail("No Hector run produced for %s", label)
+  #
+  # Final success/failure test.
+  #
+
+  if (
+    !converged &&
+    current$max_res <= tol
+  ) {
+    converged <- TRUE
   }
 
-  hlast <- history[[length(history)]]
+  if (!converged) {
 
-  if (hlast$max_abs_nonco2_error_wm2 > tol) {
     fail(
-      "%s forcing iteration did not converge after %d iterations: %.9g > %.9g W/m2",
+      paste0(
+        "%s matched-forcing iteration did not converge ",
+        "after %d iterations: %.9g > %.9g W/m2; ",
+        "worst year=%d; FTOT tracking error=%.9g W/m2"
+      ),
       label,
       max_iter,
-      hlast$max_abs_nonco2_error_wm2,
-      tol
+      current$max_res,
+      tol,
+      current$worst_year,
+      current$forcing_tracking_error
     )
   }
 
+  say("")
+  say(
+    paste0(
+      "%s FINAL: residual=%.9g W/m2; ",
+      "worst year=%d; tracking error=%.9g W/m2"
+    ),
+    label,
+    current$max_res,
+    current$worst_year,
+    current$forcing_tracking_error
+  )
+
   list(
-    run = final,
-    history = history,
-    forcing_error = hlast$max_abs_nonco2_error_wm2
+    run =
+      current$run,
+
+    history =
+      history,
+
+    forcing_error =
+      current$max_res,
+
+    forcing_tracking_error =
+      current$forcing_tracking_error
   )
 }
+
+# =============================================================================
+# RUN REMOVAL-ON AND REMOVAL-OFF BRANCHES
+# =============================================================================
 
 on_case <- fit_case(
   "removal-ON matched",
@@ -421,76 +1155,133 @@ off_case <- fit_case(
   FALSE
 )
 
-co_on <- on_case$run$co2
-co_off <- off_case$run$co2
+co_on <-
+  on_case$run$co2
 
-tas_on <- on_case$run$tas
-tas_off <- off_case$run$tas
+co_off <-
+  off_case$run$co2
 
-rfco2_on <- on_case$run$rfco2
-rfco2_off <- off_case$run$rfco2
+tas_on <-
+  on_case$run$tas
 
-rftot_on <- on_case$run$rftot
-rftot_off <- off_case$run$rftot
+tas_off <-
+  off_case$run$tas
+
+rfco2_on <-
+  on_case$run$rfco2
+
+rfco2_off <-
+  off_case$run$rfco2
+
+rftot_on <-
+  on_case$run$rftot
+
+rftot_off <-
+  off_case$run$rftot
 
 pair <- merge(
   co_on,
   co_off,
   by = "year",
-  suffixes = c("_on", "_off")
+  suffixes = c(
+    "_on",
+    "_off"
+  )
 )
 
-names(pair)[names(pair) == "value_on"] <- "co2_on_ppm"
-names(pair)[names(pair) == "value_off"] <- "co2_off_ppm"
+names(pair)[
+  names(pair) == "value_on"
+] <- "co2_on_ppm"
 
-pair <- pair[order(pair$year), ]
+names(pair)[
+  names(pair) == "value_off"
+] <- "co2_off_ppm"
 
-if (!identical(as.numeric(pair$year), yrs)) {
-  fail("Hector paired years mismatch")
+pair <-
+  pair[
+    order(pair$year),
+  ]
+
+if (!identical(
+  as.numeric(pair$year),
+  yrs
+)) {
+  fail(
+    "Hector paired years mismatch"
+  )
 }
 
 pair$delta_co2_ppm <-
   pair$co2_off_ppm -
   pair$co2_on_ppm
 
-cum_cdr <- cumsum(
-  x$cdr_gtco2
-)
+cum_cdr <-
+  cumsum(
+    x$cdr_gtco2
+  )
 
-pair$cumulative_cdr_gtco2 <- cum_cdr[
-  match(pair$year, x$year)
-]
+pair$cumulative_cdr_gtco2 <-
+  cum_cdr[
+    match(
+      pair$year,
+      x$year
+    )
+  ]
 
-gtco2_per_ppm <- 2.124 * (44.009 / 12.011)
+gtco2_per_ppm <-
+  2.124 *
+  (44.009 / 12.011)
 
-pair$apparent_response_fraction <- ifelse(
-  pair$cumulative_cdr_gtco2 > 0,
-  pair$delta_co2_ppm *
-    gtco2_per_ppm /
-    pair$cumulative_cdr_gtco2,
-  NA_real_
-)
+pair$apparent_response_fraction <-
+  ifelse(
+    pair$cumulative_cdr_gtco2 > 0,
+
+    pair$delta_co2_ppm *
+      gtco2_per_ppm /
+      pair$cumulative_cdr_gtco2,
+
+    NA_real_
+  )
 
 if (
-  any(!is.finite(pair$co2_on_ppm)) ||
-  any(!is.finite(pair$co2_off_ppm))
+  any(!is.finite(
+    pair$co2_on_ppm
+  )) ||
+  any(!is.finite(
+    pair$co2_off_ppm
+  ))
 ) {
-  fail("Non-finite Hector CO2")
+  fail(
+    "Non-finite Hector CO2"
+  )
 }
 
-if (any(pair$delta_co2_ppm < -1e-8)) {
+if (
+  any(
+    pair$delta_co2_ppm <
+    -1e-8
+  )
+) {
   fail(
     "Removal ON raises CO2 above OFF beyond tolerance"
   )
 }
 
-# Within-model common-state check at 2026.
+# =============================================================================
+# WITHIN-MODEL COMMON-STATE CHECK AT 2026
+#
 # CDR is zero in 2026, so both branches must match.
+# =============================================================================
 
-common_2026_co2 <- abs(
-  pair$co2_on_ppm[pair$year == 2026] -
-  pair$co2_off_ppm[pair$year == 2026]
-)
+common_2026_co2 <-
+  abs(
+    pair$co2_on_ppm[
+      pair$year == 2026
+    ] -
+    pair$co2_off_ppm[
+      pair$year == 2026
+    ]
+  )
 
 if (
   length(common_2026_co2) != 1 ||
@@ -501,10 +1292,15 @@ if (
   )
 }
 
-common_2026_tas <- abs(
-  tas_on$value[tas_on$year == 2026] -
-  tas_off$value[tas_off$year == 2026]
-)
+common_2026_tas <-
+  abs(
+    tas_on$value[
+      tas_on$year == 2026
+    ] -
+    tas_off$value[
+      tas_off$year == 2026
+    ]
+  )
 
 if (
   length(common_2026_tas) != 1 ||
@@ -515,31 +1311,59 @@ if (
   )
 }
 
+# =============================================================================
+# OUTPUT: ATTRIBUTION TABLE
+# =============================================================================
+
 write.csv(
   pair,
   "hector_matched_attribution.csv",
   row.names = FALSE
 )
 
-# Wide state/forcing audit for direct downstream inspection.
+# =============================================================================
+# OUTPUT: WIDE STATE/FORCING AUDIT
+# =============================================================================
 
 audit <- data.frame(
-  year = yrs,
-  co2_on_ppm = co_on$value,
-  co2_off_ppm = co_off$value,
-  tas_on_c = tas_on$value,
-  tas_off_c = tas_off$value,
-  rfco2_on_wm2 = rfco2_on$value,
-  rfco2_off_wm2 = rfco2_off$value,
-  rftot_on_wm2 = rftot_on$value,
-  rftot_off_wm2 = rftot_off$value
+  year =
+    yrs,
+
+  co2_on_ppm =
+    co_on$value,
+
+  co2_off_ppm =
+    co_off$value,
+
+  tas_on_c =
+    tas_on$value,
+
+  tas_off_c =
+    tas_off$value,
+
+  rfco2_on_wm2 =
+    rfco2_on$value,
+
+  rfco2_off_wm2 =
+    rfco2_off$value,
+
+  rftot_on_wm2 =
+    rftot_on$value,
+
+  rftot_off_wm2 =
+    rftot_off$value
 )
 
-target_full <- ft$matched_nonco2_forcing_wm2[
-  match(yrs, ft$year)
-]
+target_full <-
+  ft$matched_nonco2_forcing_wm2[
+    match(
+      yrs,
+      ft$year
+    )
+  ]
 
-audit$target_nonco2_wm2 <- target_full
+audit$target_nonco2_wm2 <-
+  target_full
 
 audit$effective_nonco2_on_wm2 <-
   audit$rftot_on_wm2 -
@@ -555,30 +1379,49 @@ write.csv(
   row.names = FALSE
 )
 
-getv <- function(col, y) {
+# =============================================================================
+# MILESTONE SUMMARY
+# =============================================================================
+
+getv <- function(
+  col,
+  y
+) {
+
   z <- pair[
     pair$year == y,
     col
   ]
 
-  if (length(z) != 1) {
-    return(NA_real_)
+  if (
+    length(z) != 1
+  ) {
+    return(
+      NA_real_
+    )
   }
 
   as.numeric(z)
 }
 
-milestones <- list()
+milestones <-
+  list()
 
-for (yy in c(
-  2040,
-  2100,
-  2156,
-  2184,
-  2200,
-  2300
-)) {
-  milestones[[as.character(yy)]] <- list(
+for (
+  yy in c(
+    2040,
+    2100,
+    2156,
+    2184,
+    2200,
+    2300
+  )
+) {
+
+  milestones[[
+    as.character(yy)
+  ]] <- list(
+
     delta_co2_ppm =
       getv(
         "delta_co2_ppm",
@@ -593,25 +1436,59 @@ for (yy in c(
   )
 }
 
-summary <- list(
-  model = "Hector",
+# =============================================================================
+# MACHINE-READABLE SUMMARY
+# =============================================================================
 
-  version = "3.5.0",
+summary <- list(
+
+  model =
+    "Hector",
+
+  version =
+    "3.5.0",
 
   experiment =
-    "V62 removal-ON/OFF with FaIR-derived harmonized non-CO2 ERF after 2026",
+    paste0(
+      "V62 removal-ON/OFF with FaIR-derived harmonized ",
+      "non-CO2 ERF after 2026"
+    ),
 
   common_nonco2_target =
-    "fair_matched_nonco2_forcing.csv generated by the FaIR matched-forcing job",
+    paste0(
+      "fair_matched_nonco2_forcing.csv generated by ",
+      "the FaIR matched-forcing job"
+    ),
 
-  implementation = paste0(
-    "For each carbon branch, Hector Ftot_constrain is iterated until ",
-    "RF_TOTAL - RF_CO2 equals the common target for 2027-2300. ",
-    "CO2 forcing remains branch-specific. ",
-    "A 0.25 under-relaxation factor is used for numerical convergence."
-  ),
+  implementation =
+    paste0(
+      "For each carbon branch, Hector FTOT_CONSTRAIN is ",
+      "iterated until RF_TOTAL - RF_CO2 equals the common ",
+      "target for 2027-2300. CO2 forcing remains branch-specific. ",
+      "The numerical solution uses accepted-state adaptive ",
+      "backtracking relaxation. A trial constraint is accepted ",
+      "only when the maximum non-CO2 forcing mismatch decreases. ",
+      "Rejected trials are discarded and retried from the last ",
+      "accepted state with a smaller relaxation factor."
+    ),
 
-  match_starts = 2027,
+  solver =
+    "accepted-state-adaptive-backtracking-fixed-point",
+
+  solver_initial_relaxation_factor =
+    0.10,
+
+  solver_min_relaxation_factor =
+    0.001,
+
+  solver_max_relaxation_factor =
+    0.25,
+
+  solver_max_iterations =
+    400,
+
+  match_starts =
+    2027,
 
   common_state_2026_co2_abs_error_ppm =
     common_2026_co2,
@@ -627,6 +1504,12 @@ summary <- list(
 
   forcing_match_max_abs_off_wm2 =
     off_case$forcing_error,
+
+  ftot_tracking_max_abs_on_wm2 =
+    on_case$forcing_tracking_error,
+
+  ftot_tracking_max_abs_off_wm2 =
+    off_case$forcing_tracking_error,
 
   fit_iterations_on =
     on_case$history,
@@ -654,12 +1537,14 @@ summary <- list(
   milestones =
     milestones,
 
-  interpretation_boundary = paste0(
-    "The future non-CO2 forcing contribution is harmonized to FaIR. ",
-    "Hector retains its own carbon-cycle parameters, historical carbon pools, ",
-    "and CO2 forcing formulation. Cross-model disagreement is a result, ",
-    "not an automatic failure gate."
-  )
+  interpretation_boundary =
+    paste0(
+      "The future non-CO2 forcing contribution is harmonized ",
+      "to FaIR. Hector retains its own carbon-cycle parameters, ",
+      "historical carbon pools, and CO2 forcing formulation. ",
+      "Cross-model disagreement is a result, not an automatic ",
+      "failure gate."
+    )
 )
 
 write_json(
